@@ -74,9 +74,9 @@ def main(args):
     for i in range(len(img)):
         for j in range(len(img[0])):
             if not b_map[i][j]:
-                img[i][j][0] += (alpha - 1)*img[i][j][0] + beta
-                img[i][j][1] += (alpha - 1)*img[i][j][1] + beta
-                img[i][j][2] += (alpha - 1)*img[i][j][2] + beta
+                img[i][j][0] = (img[i][j][0] - beta)/alpha
+                img[i][j][1] = (img[i][j][1] - beta)/alpha
+                img[i][j][2] = (img[i][j][2] - beta)/alpha
     plt.imshow(img[...,[2,1,0]])
     plt.title('Final')
     plt.show()
