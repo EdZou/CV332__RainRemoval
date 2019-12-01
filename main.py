@@ -38,6 +38,9 @@ parser.add_argument('--m_val',type = float, default = 85)
 parser.add_argument('--lambda_val',type = float, default = 0.0001)
 parser.add_argument('--kernel_x',type = int, default = 7)
 parser.add_argument('--kernel_y',type = int, default = 7)
+parser.add_argument('--alpha',type = float, default = 0.95)
+parser.add_argument('--beta',type = float, default = 0.14)
+parser.add_argument('--train_mode',action = 'store_true', default = False)
 
 
 def main(args):
@@ -45,18 +48,37 @@ def main(args):
         print("Warning: kernel size should be odd number")
     train_dir = os.path.expanduser(args.train_dir)
     
-    img = cv2.imread(train_dir)
+    img = cv2.imread(train_dir).astype('float') / 255
     plt.imshow(img[...,[2,1,0]])
     plt.title('original')
     plt.show()
     kernel = [args.kernel_x, args.kernel_y]
     #dl = ImageDataset(args.train_dir)
     
-    rr = RRfunc(img, kernel, args.u_val, args.epsilon_val)
-    b_map = rr.Forward()
+    rr = RRfunc(kernel, args.u_val, args.epsilon_val)
+    b_map = rr.Forward(img)
     
     plt.imshow(b_map, cmap = 'gray')
     plt.title('Binary Map')
+    plt.show()
+    if args.train_mode:
+        #你在这里引用你的类，b_map就是找到的雨点，找到的标记为0
+        #python main.py --train_mode进入
+        #在这里得到一个alpha和beta
+        pass
+    else:
+        alpha = args.alpha
+        beta = args.beta
+
+    #revise image here
+    for i in range(len(img)):
+        for j in range(len(img[0])):
+            if not b_map[i][j]:
+                img[i][j][0] += (alpha - 1)*img[i][j][0] + beta
+                img[i][j][1] += (alpha - 1)*img[i][j][1] + beta
+                img[i][j][2] += (alpha - 1)*img[i][j][2] + beta
+    plt.imshow(img[...,[2,1,0]])
+    plt.title('Final')
     plt.show()
     '''
     plt.imshow(roi, cmap = 'gray')

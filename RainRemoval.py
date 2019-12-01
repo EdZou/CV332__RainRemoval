@@ -14,18 +14,16 @@ developed by Cong Zou, 11/10/2019
 '''
 
 class RRfunc(object):
-    def __init__(self, img, kernel, u, epsilon):
+    def __init__(self, kernel, u, epsilon):
         super(RRfunc, self).__init__()
         #all pixels in image should be normalized into [0,1], [B,G,R]
-        self.img = img.astype('float') / 255
-        print(img.shape)
         self.kernel = kernel
         self.u = u
         self.epsilon = epsilon
 
-    def Rain_detect(self):
-        origin = self.__Gpadding(np.copy(self.img), self.kernel)
-        b_map = np.ones([len(self.img), len(self.img[0])])
+    def Rain_detect(self, img):
+        origin = self.__Gpadding(np.copy(img), self.kernel)
+        b_map = np.ones([len(img), len(img[0])])
         total = self.kernel[0]*self.kernel[1]*5
         count = 0
         pbar = tqdm(total = len(b_map)*len(b_map[0]), desc = 'Detecting Rain...')
@@ -42,22 +40,24 @@ class RRfunc(object):
                 pbar.update()
         pbar.close()
         print(count)
+        '''
         plt.imshow(b_map, cmap = 'gray')
         plt.title('rough')
         plt.show()
-        b_map = self.__3dto2d(b_map)
+        '''
+        b_map = self.__3dto2d(b_map, img)
         return b_map
 
 
-    def __3dto2d(self, b_map):
+    def __3dto2d(self, b_map, img):
         count = 0
         for i in range(len(b_map)):
             for j in range(len(b_map[0])):
                 if not b_map[i][j]:
                     #3D to 2D
-                    tempsum = np.sum(self.img[i][j]) / 3
-                    u = (2*tempsum - self.img[i][j][0]-self.img[i][j][1])/tempsum
-                    v = max((tempsum-self.img[i][j][1])/tempsum, (tempsum-self.img[i][j][0])/tempsum)
+                    tempsum = np.sum(img[i][j]) / 3
+                    u = (2*tempsum - img[i][j][0]-img[i][j][1])/tempsum
+                    v = max((tempsum-img[i][j][1])/tempsum, (tempsum-img[i][j][0])/tempsum)
                     if (u**2 + v**2)**0.5 > self.epsilon:
                         b_map[i][j] = 1
                         count += 1
@@ -87,8 +87,8 @@ class RRfunc(object):
         return img 
 
 
-    def Forward(self):
-        b_map = self.Rain_detect()
+    def Forward(self, img):
+        b_map = self.Rain_detect(img)
         return b_map
 
         
