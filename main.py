@@ -127,9 +127,9 @@ def main(args):
             dl = ImageDataset(args.gif_dir)
             if args.his_bmap:
                 his_len = 10 if len(dl.datapaths) > 10 else len(dl.datapaths)
-                pbar = tqdm(total = len(dl.datapaths), desc = 'Preparing Historical B_MAP...')
+                pbar = tqdm(total = his_len, desc = 'Preparing Historical B_MAP...')
                 his_bmap = np.array([])
-                for path in dl.datapaths:
+                for path in dl.datapaths[:his_len]:
                     temp = cv2.imread(path).astype('float') / 255
                     if not len(his_bmap):
                         his_bmap = rr.Forward(np.copy(temp))
@@ -147,7 +147,7 @@ def main(args):
                 '''
                 
             frames = []
-            dirs = 'rain4'
+            dirs = 'rain3'
             pbar = tqdm(total = len(dl.datapaths), desc = 'Making Gif...')
             dirpath = args.res_dir + '\\' + 'frames'+ '_' + dirs
             if os.path.exists(dirpath) == False:
