@@ -4,7 +4,7 @@ import math
 import copy
 from tqdm import tqdm
 
-N = 8
+N = 3
 Theta = 2*N+1
 class Trainer():
     def Aprox(self, img, bmap):
@@ -32,15 +32,14 @@ class Trainer():
                     # calculate wk
                     hk = cand[index]
                     try:
-                        nu = (np.linalg.norm(hk-p, ord=2))
+                        nu = np.linalg.norm(hk-p, ord=2)
                     except:
                         nu = 0
-                    wk = math.exp(-nu/(Theta**2))**2
+                    wk = math.exp(-nu/(Theta**2))
                     hks.append(hk)
                     wk2s.append(wk**2)
                 wk2s = np.reshape(np.array(wk2s), (len(wk2s),1))
                 q = np.sum(wk2s*hks, axis=0)/np.sum(wk2s)
-                # if(q.shape == (3,)):
                 try:
                     qs[i, j] = q
                 except:
@@ -48,4 +47,3 @@ class Trainer():
         pbar.close()
         qs_2D = np.reshape(qs, (rows*cols,3))
         return qs, qs_2D
-    

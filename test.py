@@ -19,41 +19,49 @@ def detectRain(img, b_path):
     b_map = rr.Forward()
     np.savetxt(b_path, b_map)
 
-if __name__ == "__main__":
+def main():
 
-    img_path, b_path, q_path = genNames('w1', 0.01, 0.10)
+    img_path, b_path, q_path = genNames('frame0', 0.01, 0.1)
 
     tr = Trainer()
     img = cv2.imread(img_path)
+    # img = img[0:150,0:150,:]
     rows, cols, _ = img.shape
     kernel = [7, 7]
 
     # ### Detect rain 
-    # detectRain(img, b_path)
-    # b_map = RRfunc(img, kernel, 0.01, 0.10).Forward()
-    # np.savetxt(b_path, b_map)
+    b_map = RRfunc(kernel, 0.01, 0.1).Forward(img)
+    np.savetxt(b_path, b_map)
 
     # ### Do approximation
     b_map = np.loadtxt(b_path)
-    # qs_3D, qs_2D = tr.Aprox(img, b_map)
-    # np.savetxt(q_path, qs_2D)
-    # plt.imshow(qs)
-    # plt.title('Ref')
-    # plt.show()
+
+    plt.imshow(b_map)
+    plt.show()
+
+    qs_3D, qs_2D = tr.Aprox(img, b_map)
+    np.savetxt(q_path, qs_2D)
 
     qs = np.loadtxt(q_path)
     qs = np.reshape(qs, (rows, cols, 3))
-
-    # ### Deraining
-    # derain = copy.deepcopy(img)
-    # for i in range(rows):
-    #     for j in range(cols):
-    #         if b_map[i, j] == 1.0:
-    #             continue
-    #         derain[i,j] = qs[i, j]
-    #         # derain[i,j] = (0,0,0)
-    # cv2.imshow('', derain)
-    # cv2.waitKey(0)  
+    # cv2.imshow('', qs)
+    # cv2.waitKey(0)
+    # plt.imshow(qs)
+    # plt.title('Ref')
+    # plt.show()
+    # ###Deraining
+    derain = copy.deepcopy(img)
+    for i in range(rows):
+        for j in range(cols):
+            if b_map[i, j] == 1.0:
+                continue
+            derain[i,j] = qs[i, j]
+            # derain[i,j] = (0,0,0)
+    # print(derain)
+    # derain = (derain*255/derain.max()).astype(np.uint8)
+    derain.astype(np.uint8)
+    cv2.imshow('', derain)
+    cv2.waitKey(0)  
 
     img = img/255
     qs = qs/qs.max()
@@ -74,18 +82,32 @@ if __name__ == "__main__":
                     continue
                 intensityValues.append(imgChannel[i, j])
                 approximationValues.append(qChannel[i, j])
-
         dk = np.array(intensityValues)
         qk = np.array(approximationValues)
         k = len(intensityValues)
-        print(k)
-        lamda = 0.01
+        lamda = 0
         nu = (1/k)*np.sum(dk*qk)-np.average(dk)*np.average(qk)
-        de = np.var(qk)+lamda**2
-
+        de = np.var(qk)+lamda
+        print(nu, de)
         alpha[color] = nu/de
         beta[color] = np.average(dk) - alpha[color]*np.average(qk)
 
     print(alpha, beta)
-    # plt.scatter(approximationValues, intensityValues, alpha=0.6)
-    # plt.show()
+    plt.scatter(approximationValues, intensityValues, alpha=0.6)
+    plt.show()  
+
+
+    derain = copy.deepcopy(img)
+    for color in range(3):
+        for i in range(rows):
+            for j in range(cols):
+                if b_map[i, j] == 1.0:
+                    continue
+                derain[i,j,color] = (img[i,j,color]-beta[color])/alpha[color]
+    # print(derain)
+    cv2.imshow('', derain)
+    cv2.waitKey(0)
+
+
+if __name__ == "__main__":
+    main()
