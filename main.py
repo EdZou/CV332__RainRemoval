@@ -38,11 +38,11 @@ parser.add_argument('--m_val',type = float, default = 85)
 parser.add_argument('--lambda_val',type = float, default = 0.0001)
 parser.add_argument('--kernel_x',type = int, default = 7)
 parser.add_argument('--kernel_y',type = int, default = 7)
-parser.add_argument('--alpha',type = float, default = 0.95)
-parser.add_argument('--beta',type = float, default = 0.12)
+parser.add_argument('--alpha',type = float, default = 0.92)
+parser.add_argument('--beta',type = float, default = 0.1)
 parser.add_argument('--train_mode',action = 'store_true', default = False)
 parser.add_argument('--gif_mode', action = 'store_true', default = False)
-parser.add_argument('--his_bmap', type = bool, default = True)
+parser.add_argument('--his_bmap', type = int, default = 1)
 
 
 def main(args):
@@ -147,7 +147,7 @@ def main(args):
                 '''
                 
             frames = []
-            dirs = 'rain3'
+            dirs = 'rain5'
             pbar = tqdm(total = len(dl.datapaths), desc = 'Making Gif...')
             dirpath = args.res_dir + '\\' + 'frames'+ '_' + dirs
             if os.path.exists(dirpath) == False:
@@ -158,6 +158,7 @@ def main(args):
                 b_map = rr.Forward(np.copy(fimg))
                 if args.his_bmap:
                     b_map += his_bmap
+                    b_map = np.clip(b_map, 0, 1)
                 resimg = img_revise(fimg, b_map)
                 resimg = cv2.GaussianBlur(resimg, (3,3), 0)
                 conc = img_concat(fimg, b_map, resimg)
